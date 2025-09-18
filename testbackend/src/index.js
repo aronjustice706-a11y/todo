@@ -34,49 +34,49 @@ app.get('/api/items', async (c) => {
 // GET /api/items/user/:responsable - Récupérer les tâches d'un utilisateur spécifique (compatible ancien/nouveau schéma)
 app.get('/api/items/user/:responsable', async (c) => {
   try {
-    console.log('=== GET /api/items/user/:responsable START ===')
+    console.log('=== DÉBUT GET /api/items/user/:responsable ===')
     
     const responsable = decodeURIComponent(c.req.param('responsable'))
-    console.log('Loading tasks for responsable (Appwrite ID):', responsable)
+    console.log('Chargement des tâches pour le responsable (ID Appwrite):', responsable)
     
     // D'abord vérifier la structure de la table
     const schemaQuery = await c.env.prod_testbackend
       .prepare("PRAGMA table_info(items)")
       .all()
     
-    console.log('Table schema:', schemaQuery.results)
+    console.log('Schéma de la table:', schemaQuery.results)
     
     const hasResponsable = schemaQuery.results?.some(col => col.name === 'Responsable')
     const hasUserId = schemaQuery.results?.some(col => col.name === 'UserId')
     
-    console.log('Schema check - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
+    console.log('Vérification du schéma - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
     
     let query;
     
     if (hasResponsable) {
       // Ancien schéma avec colonne Responsable
-      console.log('Using old schema with Responsable column')
+      console.log('Utilisation de l\'ancien schéma avec la colonne Responsable')
       query = await c.env.prod_testbackend
         .prepare("SELECT * FROM items WHERE Responsable = ? ORDER BY DateLimite ASC")
         .bind(responsable)
         .all()
     } else if (hasUserId) {
       // Nouveau schéma avec colonne UserId
-      console.log('Using new schema with UserId column')
+      console.log('Utilisation du nouveau schéma avec la colonne UserId')
       query = await c.env.prod_testbackend
         .prepare("SELECT * FROM items WHERE UserId = ? ORDER BY DateLimite ASC")
         .bind(responsable)
         .all()
     } else {
       // Aucun schéma reconnu
-      console.error('No recognized schema found')
+      console.error('Aucun schéma reconnu trouvé')
       return c.json({ 
         error: "Structure de base de données non reconnue",
         details: "Colonnes disponibles: " + schemaQuery.results?.map(col => col.name).join(', ')
       }, 500)
     }
     
-    console.log('Found', query.results?.length || 0, 'tasks for responsable:', responsable)
+    console.log('Trouvé', query.results?.length || 0, 'tâches pour le responsable:', responsable)
     
     return c.json({
       message: "success",
@@ -86,14 +86,14 @@ app.get('/api/items/user/:responsable', async (c) => {
       schema: hasResponsable ? 'old' : 'new'
     })
   } catch (error) {
-    console.error('Error in GET /api/items/user/:responsable:', error)
+    console.error('Erreur dans GET /api/items/user/:responsable:', error)
     return c.json({ 
       error: "Erreur lors de la récupération des tâches",
       details: error.message,
       stack: error.stack
     }, 500)
   } finally {
-    console.log('=== GET /api/items/user/:responsable END ===')
+    console.log('=== FIN GET /api/items/user/:responsable ===')
   }
 })
 
@@ -149,19 +149,19 @@ app.post('/api/items', async (c) => {
 // POST /api/items/user/:responsable - Créer une nouvelle tâche pour un utilisateur spécifique (compatible ancien/nouveau schéma)
 app.post('/api/items/user/:responsable', async (c) => {
   try {
-    console.log('=== POST /api/items/user/:responsable START ===')
+    console.log('=== DÉBUT POST /api/items/user/:responsable ===')
     
     const responsable = decodeURIComponent(c.req.param('responsable'))
-    console.log('Responsable (Appwrite ID) from param:', responsable)
+    console.log('Responsable (ID Appwrite) depuis le paramètre:', responsable)
     
     const body = await c.req.json()
-    console.log('Request body:', body)
+    console.log('Corps de la requête:', body)
     
     const { Titre, Description, DateLimite, Priorite } = body
     
     // Validation basique
     if (!Titre || !Titre.trim()) {
-      console.log('Validation failed: Titre is required')
+      console.log('Validation échouée: Le titre est requis')
       return c.json({ error: "Le titre est requis" }, 400)
     }
 
@@ -173,13 +173,13 @@ app.post('/api/items/user/:responsable', async (c) => {
     const hasResponsable = schemaQuery.results?.some(col => col.name === 'Responsable')
     const hasUserId = schemaQuery.results?.some(col => col.name === 'UserId')
     
-    console.log('Schema check - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
+    console.log('Vérification du schéma - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
 
  let result;
     
     if (hasResponsable) {
       // Ancien schéma avec colonne Responsable
-      console.log('Creating task with old schema (Responsable column)')
+      console.log('Création de la tâche avec l\'ancien schéma (colonne Responsable)')
       result = await c.env.prod_testbackend
         .prepare(`INSERT INTO items (Titre, Description, Statut, DateLimite, Priorite, Responsable)
                   VALUES (?, ?, 'pending', ?, ?, ?)`)
@@ -187,21 +187,21 @@ app.post('/api/items/user/:responsable', async (c) => {
         .run()
     } else if (hasUserId) {
       // Nouveau schéma avec colonne UserId
-      console.log('Creating task with new schema (UserId column)')
+      console.log('Création de la tâche avec le nouveau schéma (colonne UserId)')
       result = await c.env.prod_testbackend
         .prepare(`INSERT INTO items (Titre, Description, Statut, DateLimite, Priorite, UserId, UserEmail)
                   VALUES (?, ?, 'pending', ?, ?, ?, ?)`)
         .bind(Titre.trim(), Description || '', DateLimite || null, Priorite || 'moyenne', responsable, responsable)
         .run()
     } else {
-      console.error('No recognized schema found')
+      console.error('Aucun schéma reconnu trouvé')
       return c.json({ 
         error: "Structure de base de données non reconnue",
         details: "Colonnes disponibles: " + schemaQuery.results?.map(col => col.name).join(', ')
       }, 500)
     }
 
-    console.log('Task created successfully, ID:', result.meta.last_row_id)
+    console.log('Tâche créée avec succès, ID:', result.meta.last_row_id)
 
     return c.json({ 
       message: "Tâche ajoutée avec succès", 
@@ -218,14 +218,14 @@ app.post('/api/items/user/:responsable', async (c) => {
       }
     }, 201)
   } catch (error) {
-    console.error('Error in POST /api/items/user/:responsable:', error)
+    console.error('Erreur dans POST /api/items/user/:responsable:', error)
     return c.json({ 
       error: "Erreur lors de la création de la tâche",
       details: error.message,
       stack: error.stack
     }, 500)
   } finally {
-    console.log('=== POST /api/items/user/:responsable END ===')
+    console.log('=== FIN POST /api/items/user/:responsable ===')
   }
 })
 
@@ -251,14 +251,14 @@ app.put('/api/items/:id', async (c) => {
 // PUT /api/items/user/:responsable/:id - Mettre à jour une tâche d'un utilisateur spécifique (compatible ancien/nouveau schéma)
 app.put('/api/items/user/:responsable/:id', async (c) => {
   try {
-    console.log('=== PUT /api/items/user/:responsable/:id START ===')
+    console.log('=== DÉBUT PUT /api/items/user/:responsable/:id ===')
     
     const responsable = decodeURIComponent(c.req.param('responsable'))
     const id = c.req.param('id')
     const body = await c.req.json()
     const { Titre, Description, Statut, DateLimite, Priorite } = body
 
-    console.log('Updating task for responsable (Appwrite ID):', responsable, 'task ID:', id)
+    console.log('Mise à jour de la tâche pour le responsable (ID Appwrite):', responsable, 'ID de la tâche:', id)
 
     // Vérifier la structure de la table
     const schemaQuery = await c.env.prod_testbackend
@@ -268,13 +268,13 @@ app.put('/api/items/user/:responsable/:id', async (c) => {
     const hasResponsable = schemaQuery.results?.some(col => col.name === 'Responsable')
     const hasUserId = schemaQuery.results?.some(col => col.name === 'UserId')
     
-    console.log('Schema check - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
+    console.log('Vérification du schéma - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
 
     let result;
     
     if (hasResponsable) {
       // Ancien schéma avec colonne Responsable
-      console.log('Updating task with old schema (Responsable column)')
+      console.log('Mise à jour de la tâche avec l\'ancien schéma (colonne Responsable)')
       result = await c.env.prod_testbackend
         .prepare(`UPDATE items SET Titre = ?, Description = ?, Statut = ?, DateLimite = ?, Priorite = ?
                   WHERE ItemId = ? AND Responsable = ?`)
@@ -282,14 +282,14 @@ app.put('/api/items/user/:responsable/:id', async (c) => {
         .run()
     } else if (hasUserId) {
       // Nouveau schéma avec colonne UserId
-      console.log('Updating task with new schema (UserId column)')
+      console.log('Mise à jour de la tâche avec le nouveau schéma (colonne UserId)')
       result = await c.env.prod_testbackend
         .prepare(`UPDATE items SET Titre = ?, Description = ?, Statut = ?, DateLimite = ?, Priorite = ?
                   WHERE ItemId = ? AND UserId = ?`)
         .bind(Titre, Description, Statut, DateLimite, Priorite, id, responsable)
         .run()
     } else {
-      console.error('No recognized schema found')
+      console.error('Aucun schéma reconnu trouvé')
       return c.json({ 
         error: "Structure de base de données non reconnue",
         details: "Colonnes disponibles: " + schemaQuery.results?.map(col => col.name).join(', ')
@@ -302,14 +302,14 @@ app.put('/api/items/user/:responsable/:id', async (c) => {
 
     return c.json({ message: "Tâche mise à jour avec succès" })
   } catch (error) {
-    console.error('Error in PUT /api/items/user/:responsable/:id:', error)
+    console.error('Erreur dans PUT /api/items/user/:responsable/:id:', error)
     return c.json({ 
       error: "Erreur lors de la mise à jour de la tâche",
       details: error.message,
       stack: error.stack
     }, 500)
   } finally {
-    console.log('=== PUT /api/items/user/:responsable/:id END ===')
+    console.log('=== FIN PUT /api/items/user/:responsable/:id ===')
   }
 })
 
@@ -332,12 +332,12 @@ app.delete('/api/items/:id', async (c) => {
 // DELETE /api/items/user/:responsable/:id - Supprimer une tâche d'un utilisateur spécifique (compatible ancien/nouveau schéma)
 app.delete('/api/items/user/:responsable/:id', async (c) => {
   try {
-    console.log('=== DELETE /api/items/user/:responsable/:id START ===')
+    console.log('=== DÉBUT DELETE /api/items/user/:responsable/:id ===')
     
     const responsable = decodeURIComponent(c.req.param('responsable'))
     const id = c.req.param('id')
 
-    console.log('Deleting task for responsable (Appwrite ID):', responsable, 'task ID:', id)
+    console.log('Suppression de la tâche pour le responsable (ID Appwrite):', responsable, 'ID de la tâche:', id)
 
     // Vérifier la structure de la table
     const schemaQuery = await c.env.prod_testbackend
@@ -347,26 +347,26 @@ app.delete('/api/items/user/:responsable/:id', async (c) => {
     const hasResponsable = schemaQuery.results?.some(col => col.name === 'Responsable')
     const hasUserId = schemaQuery.results?.some(col => col.name === 'UserId')
     
-    console.log('Schema check - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
+    console.log('Vérification du schéma - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
 
     let result;
     
     if (hasResponsable) {
       // Ancien schéma avec colonne Responsable
-      console.log('Deleting task with old schema (Responsable column)')
+      console.log('Suppression de la tâche avec l\'ancien schéma (colonne Responsable)')
       result = await c.env.prod_testbackend
         .prepare("DELETE FROM items WHERE ItemId = ? AND Responsable = ?")
         .bind(id, responsable)
         .run()
     } else if (hasUserId) {
       // Nouveau schéma avec colonne UserId
-      console.log('Deleting task with new schema (UserId column)')
+      console.log('Suppression de la tâche avec le nouveau schéma (colonne UserId)')
       result = await c.env.prod_testbackend
         .prepare("DELETE FROM items WHERE ItemId = ? AND UserId = ?")
         .bind(id, responsable)
         .run()
     } else {
-      console.error('No recognized schema found')
+      console.error('Aucun schéma reconnu trouvé')
       return c.json({ 
         error: "Structure de base de données non reconnue",
         details: "Colonnes disponibles: " + schemaQuery.results?.map(col => col.name).join(', ')
@@ -379,45 +379,45 @@ app.delete('/api/items/user/:responsable/:id', async (c) => {
 
     return c.json({ message: "Tâche supprimée avec succès" })
   } catch (error) {
-    console.error('Error in DELETE /api/items/user/:responsable/:id:', error)
+    console.error('Erreur dans DELETE /api/items/user/:responsable/:id:', error)
     return c.json({ 
       error: "Erreur lors de la suppression de la tâche",
       details: error.message,
       stack: error.stack
     }, 500)
   } finally {
-    console.log('=== DELETE /api/items/user/:responsable/:id END ===')
+    console.log('=== FIN DELETE /api/items/user/:responsable/:id ===')
   }
 })
 
 // GET /api/debug/schema - Diagnostic complet de la structure de la base
 app.get('/api/debug/schema', async (c) => {
   try {
-    console.log('=== SCHEMA DIAGNOSTIC START ===')
+    console.log('=== DÉBUT DIAGNOSTIC SCHÉMA ===')
     
     // Vérifier la structure de la table items
     const schemaQuery = await c.env.prod_testbackend
       .prepare("PRAGMA table_info(items)")
       .all()
     
-    console.log('Items table schema:', schemaQuery.results)
+    console.log('Schéma de la table items:', schemaQuery.results)
     
     // Vérifier les données existantes
     const sampleQuery = await c.env.prod_testbackend
       .prepare("SELECT * FROM items LIMIT 3")
       .all()
     
-    console.log('Sample data:', sampleQuery.results)
+    console.log('Données d\'exemple:', sampleQuery.results)
     
     // Vérifier toutes les tables
     const tablesQuery = await c.env.prod_testbackend
       .prepare("SELECT name FROM sqlite_master WHERE type='table'")
       .all()
     
-    console.log('All tables:', tablesQuery.results)
+    console.log('Toutes les tables:', tablesQuery.results)
     
     const result = {
-      message: "Schema diagnostic completed",
+      message: "Diagnostic du schéma terminé",
       timestamp: new Date().toISOString(),
       itemsSchema: schemaQuery.results || [],
       sampleData: sampleQuery.results || [],
@@ -428,17 +428,17 @@ app.get('/api/debug/schema', async (c) => {
       columnNames: schemaQuery.results?.map(col => col.name) || []
     }
     
-    console.log('Diagnostic result:', result)
+    console.log('Résultat du diagnostic:', result)
     return c.json(result)
   } catch (error) {
-    console.error('Schema diagnostic failed:', error)
+    console.error('Échec du diagnostic du schéma:', error)
     return c.json({ 
-      error: "Schema diagnostic failed", 
+      error: "Échec du diagnostic du schéma", 
       details: error.message,
       stack: error.stack
     }, 500)
   } finally {
-    console.log('=== SCHEMA DIAGNOSTIC END ===')
+    console.log('=== FIN DIAGNOSTIC SCHÉMA ===')
   }
 })
 

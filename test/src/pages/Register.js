@@ -13,20 +13,20 @@ const Register=()=>{
 		setFormValues((prev) => ({ ...prev, [name]: value }));
 	};
 
-	// Appwrite registration function
+	// Fonction d'inscription Appwrite
 
 	const registerUser = async (name, email, password) => {
 		try {
 			const response = await account.create('unique()', email, password, name);
 			return response;
 		} catch (error) {
-			console.log('Registration error:', error);
-			// Return specific error message
+			console.log('Erreur d\'inscription:', error);
+			// Retourner un message d'erreur spécifique
             
 			if (error.message) {
 				throw new Error(error.message);
 			} else {
-				throw new Error('Registration failed. Please check your connection and try again.');
+				throw new Error('Échec de l\'inscription. Veuillez vérifier votre connexion et réessayer.');
 			}
 		}
 	};
@@ -35,17 +35,17 @@ const Register=()=>{
 	const validate = () => {
 		const nextErrors = {};
 		if (!formValues.name.trim()) {
-			nextErrors.name = "Name is required";
+			nextErrors.name = "Le nom est requis";
 		}
 		if (!formValues.email.trim()) {
-			nextErrors.email = "Email is required";
+			nextErrors.email = "L'email est requis";
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
-			nextErrors.email = "Enter a valid email";
+			nextErrors.email = "Entrez un email valide";
 		}
 		if (!formValues.password) {
-			nextErrors.password = "Password is required";
+			nextErrors.password = "Le mot de passe est requis";
 		} else if (formValues.password.length < 6) {
-			nextErrors.password = "Password must be at least 6 characters";
+			nextErrors.password = "Le mot de passe doit contenir au moins 6 caractères";
 		}
 		return nextErrors;
 	};
@@ -60,10 +60,10 @@ const Register=()=>{
 		try {
 			// Créer l'utilisateur dans Appwrite
 			const appwriteUser = await registerUser(formValues.name, formValues.email, formValues.password);
-			setMessage("Registration successful! You can now login.");
+			setMessage("Inscription réussie ! Vous pouvez maintenant vous connecter.");
 			setFormValues({ name: "", email: "", password: "" });
 		} catch (error) {
-			setMessage(error.message || "Registration failed. Please try again.");
+			setMessage(error.message || "Échec de l'inscription. Veuillez réessayer.");
 		} finally {
 			setSubmitting(false);
 		}
@@ -73,16 +73,16 @@ const Register=()=>{
 	return(
 		<div className="register-page">
 			<div className="register-card">
-				<h1 className="register-title">Create account</h1>
-				<p className="register-subtitle">Sign up with your email and password</p>
+				<h1 className="register-title">Créer un compte</h1>
+				<p className="register-subtitle">Inscrivez-vous avec votre email et mot de passe</p>
 				<form className="register-form" onSubmit={handleSubmit} noValidate>
 					<div className="register-field">
-						<label htmlFor="name" className="register-label">Name</label>
+						<label htmlFor="name" className="register-label">Nom</label>
 						<input
 							id="name"
 							name="name"
 							type="text"
-							placeholder="Your name"
+							placeholder="Votre nom"
 							value={formValues.name}
 							onChange={handleChange}
 							className="register-input"
@@ -97,7 +97,7 @@ const Register=()=>{
 							id="email"
 							name="email"
 							type="email"
-							placeholder="you@example.com"
+							placeholder="vous@exemple.com"
 							value={formValues.email}
 							onChange={handleChange}
 							className="register-input"
@@ -107,12 +107,12 @@ const Register=()=>{
 					</div>
 
 					<div className="register-field">
-						<label htmlFor="password" className="register-label">Password</label>
+						<label htmlFor="password" className="register-label">Mot de passe</label>
 						<input
 							id="password"
 							name="password"
 							type="password"
-							placeholder="Minimum 6 characters"
+							placeholder="Minimum 6 caractères"
 							value={formValues.password}
 							onChange={handleChange}
 							className="register-input"
@@ -126,12 +126,12 @@ const Register=()=>{
 						className="register-button"
 						disabled={submitting}
 					>
-						{submitting ? "Creating account..." : "Create account"}
+						{submitting ? "Création du compte..." : "Créer le compte"}
 					</button>
 					{message && <div className={`register-message ${message.includes('successful') ? 'success' : 'error'}`}>{message}</div>}
 				</form>
 				<div className="register-footer">
-					<p>Already have an account? <Link to="/login" className="login-link">Sign in</Link></p>
+					<p>Vous avez déjà un compte ? <Link to="/login" className="login-link">Se connecter</Link></p>
 				</div>
 			</div>
 		</div>

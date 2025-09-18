@@ -34,7 +34,7 @@ INSERT INTO users (ExternalId, Username, Email, Password) VALUES
 
 
 INSERT INTO items (Titre, Description, Statut, DateLimite, Priorite, Responsable) VALUES
-('Acheter du matériel', 'Commander les routeurs et câbles pour le réseau', 'pending', '2025-09-15', 'haute', 'appwrite_jean'),
-('Configurer le routeur', 'Installation et configuration du routeur principal', 'in_progress', '2025-09-16', 'haute', 'appwrite_marie'),
-('Installer les points d''accès', 'Déployer les répéteurs dans les bureaux', 'pending', '2025-09-17', 'moyenne', 'appwrite_pierre'),
-('Tester la connexion', 'Vérifier la stabilité et la bande passante', 'pending', '2025-09-18', 'basse', 'appwrite_sophie');
+('Acheter du matériel', 'Commander les routeurs et câbles pour le réseau', 'en attente', '2025-09-15', 'haute', 'appwrite_jean'),
+('Configurer le routeur', 'Installation et configuration du routeur principal', 'en cours', '2025-09-16', 'haute', 'appwrite_marie'),
+('Installer les points d''accès', 'Déployer les répéteurs dans les bureaux', 'en attente', '2025-09-17', 'moyenne', 'appwrite_pierre'),
+('Tester la connexion', 'Vérifier la stabilité et la bande passante', 'en attente', '2025-09-18', 'basse', 'appwrite_sophie');

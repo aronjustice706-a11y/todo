@@ -15,19 +15,19 @@ class ApiService {
       ...options,
     };
 
-    console.log(`Making API request to: ${url}`, config);
+    console.log(`Faire une requête API vers: ${url}`, config);
 
     try {
       const response = await fetch(url, config);
       
-      console.log(`Response status: ${response.status} ${response.statusText}`);
+      console.log(`Statut de la réponse: ${response.status} ${response.statusText}`);
       
       if (!response.ok) {
         let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
         
         try {
           const errorData = await response.json();
-          console.log('Error response data:', errorData);
+          console.log('Données de réponse d\'erreur:', errorData);
           if (errorData.error) {
             errorMessage = errorData.error;
           }
@@ -35,7 +35,7 @@ class ApiService {
             errorMessage += ` - ${errorData.details}`;
           }
         } catch (e) {
-          console.log('Could not parse error response as JSON');
+          console.log('Impossible de parser la réponse d\'erreur en JSON');
           // Si on ne peut pas parser le JSON, on garde le message HTTP
         }
         
@@ -45,10 +45,10 @@ class ApiService {
       }
 
       const data = await response.json();
-      console.log('API response data:', data);
+      console.log('Données de réponse API:', data);
       return data;
     } catch (error) {
-      console.error(`API Error for ${endpoint}:`, error);
+      console.error(`Erreur API pour ${endpoint}:`, error);
       
       // Gestion spécifique des erreurs de réseau
       if (error.name === 'TypeError' && error.message.includes('fetch')) {

@@ -20,14 +20,14 @@ const TodoList = ({ onLogout }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Get current user and load todos
+    // Obtenir l'utilisateur actuel et charger les tâches
     const initializeApp = async () => {
       try {
         const currentUser = await account.get();
         setUser(currentUser);
         await loadTodos(currentUser);
       } catch (error) {
-        console.log("User not logged in");
+        console.log("Utilisateur non connecté");
         onLogout();
       }
     };
@@ -44,7 +44,7 @@ const TodoList = ({ onLogout }) => {
       // Utilise l'ID Appwrite comme identifiant principal (pour la persistance même si email change)
       const responsable = effectiveUser?.$id || effectiveUser?.email || effectiveUser?.name;
       
-      console.log('Frontend - Loading todos for:', {
+      console.log('Frontend - Chargement des tâches pour:', {
         responsable: responsable,
         user: effectiveUser,
         userKeys: {
@@ -55,16 +55,16 @@ const TodoList = ({ onLogout }) => {
       });
       
       const items = await apiService.getUserItems(responsable);
-      console.log('Frontend - API response:', items);
+      console.log('Frontend - Réponse API:', items);
       
       // API retourne { message, data } sur les endpoints user
       const list = Array.isArray(items) ? items : (items?.data || []);
-      console.log('Frontend - Processed list:', list);
+      console.log('Frontend - Liste traitée:', list);
       
       setTodos(list);
     } catch (error) {
-      console.error("Frontend - Error loading todos:", error);
-      console.error("Frontend - Error details:", {
+      console.error("Frontend - Erreur lors du chargement des tâches:", error);
+      console.error("Frontend - Détails de l'erreur:", {
         message: error.message,
         status: error.status,
         responsable: effectiveUser?.$id || effectiveUser?.email || effectiveUser?.name,
@@ -93,7 +93,7 @@ const TodoList = ({ onLogout }) => {
         };
         const responsable = todoData.Responsable;
         
-        console.log('Frontend - Adding todo with:', {
+        console.log('Frontend - Ajout de la tâche avec:', {
           responsable: responsable,
           user: user,
           todoData: todoData
@@ -110,8 +110,8 @@ const TodoList = ({ onLogout }) => {
         });
         await loadTodos(); // Recharger la liste
       } catch (error) {
-        console.error("Error adding todo:", error);
-        console.error("Error details:", {
+        console.error("Erreur lors de l'ajout de la tâche:", error);
+        console.error("Détails de l'erreur:", {
           message: error.message,
           status: error.status,
           responsable: user?.$id || user?.email || user?.name,
@@ -132,7 +132,7 @@ const TodoList = ({ onLogout }) => {
       await apiService.deleteUserItem(responsable, id);
       await loadTodos(); // Recharger la liste
     } catch (error) {
-      console.error("Error deleting todo:", error);
+      console.error("Erreur lors de la suppression de la tâche:", error);
       setError("Erreur lors de la suppression de la tâche");
     } finally {
       setLoading(false);
@@ -151,7 +151,7 @@ const TodoList = ({ onLogout }) => {
       await apiService.updateUserItem(responsable, id, { ...todo, Statut: newStatus });
       await loadTodos(); // Recharger la liste
     } catch (error) {
-      console.error("Error updating todo:", error);
+      console.error("Erreur lors de la mise à jour de la tâche:", error);
       setError("Erreur lors de la mise à jour de la tâche");
     } finally {
       setLoading(false);
@@ -183,7 +183,7 @@ const TodoList = ({ onLogout }) => {
         setEditingData({});
         await loadTodos(); // Recharger la liste
       } catch (error) {
-        console.error("Error updating todo:", error);
+        console.error("Erreur lors de la mise à jour de la tâche:", error);
         setError("Erreur lors de la mise à jour de la tâche");
       } finally {
         setLoading(false);
@@ -220,22 +220,22 @@ const TodoList = ({ onLogout }) => {
       await account.deleteSession("current");
       onLogout();
     } catch (error) {
-      console.log("Logout error:", error);
+      console.log("Erreur de déconnexion:", error);
       onLogout();
     }
   };
 
   if (!user) {
-    return <div className="loading">Loading...</div>;
+    return <div className="loading">Chargement...</div>;
   }
 
   return (
     <div className="todo-container">
       <div className="todo-header">
-        <h1>Todo List</h1>
+        <h1>Liste des Tâches</h1>
         <div className="user-info">
-          <span>Welcome, {user.name || user.email} (ID: {user.$id})</span>
-          <button onClick={handleLogout} className="logout-btn">Logout</button>
+          <span>Bienvenue, {user.name || user.email} (ID: {user.$id})</span>
+          <button onClick={handleLogout} className="logout-btn">Déconnexion</button>
         </div>
       </div>
 
@@ -335,8 +335,8 @@ const TodoList = ({ onLogout }) => {
 
       <div className="todo-stats">
         <span>Total: {todos.length}</span>
-        <span>Completed: {todos.filter(todo => todo.Statut === 'completed').length}</span>
-        <span>Remaining: {todos.filter(todo => todo.Statut !== 'completed').length}</span>
+        <span>Terminées: {todos.filter(todo => todo.Statut === 'completed').length}</span>
+        <span>Restantes: {todos.filter(todo => todo.Statut !== 'completed').length}</span>
       </div>
 
       <div className="todo-list">

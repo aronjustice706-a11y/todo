@@ -17,12 +17,12 @@ const Login = ({ onLogin }) => {
   const validate = () => {
     const nextErrors = {};
     if (!formValues.email.trim()) {
-      nextErrors.email = "Email is required";
+      nextErrors.email = "L'email est requis";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
-      nextErrors.email = "Enter a valid email";
+      nextErrors.email = "Entrez un email valide";
     }
     if (!formValues.password) {
-      nextErrors.password = "Password is required";
+      nextErrors.password = "Le mot de passe est requis";
     }
     return nextErrors;
   };
@@ -36,25 +36,25 @@ const Login = ({ onLogin }) => {
     
     setSubmitting(true);
     try {
-      console.log('Attempting login with:', { email: formValues.email });
+      console.log('Tentative de connexion avec:', { email: formValues.email });
       const session = await account.createEmailPasswordSession(formValues.email, formValues.password);
-      console.log('Login successful:', session);
-      setMessage("Login successful!");
+      console.log('Connexion réussie:', session);
+      setMessage("Connexion réussie !");
       setTimeout(() => {
         onLogin();
       }, 1000);
     } catch (error) {
-      console.error('Login error details:', error);
+      console.error('Détails de l\'erreur de connexion:', error);
       
       // Gestion d'erreurs plus spécifique
-      let errorMessage = "Login failed. Please check your credentials.";
+      let errorMessage = "Échec de la connexion. Veuillez vérifier vos identifiants.";
       
       if (error.code === 401) {
-        errorMessage = "Invalid email or password. Please check your credentials.";
+        errorMessage = "Email ou mot de passe invalide. Veuillez vérifier vos identifiants.";
       } else if (error.code === 400) {
-        errorMessage = "Invalid request. Please check your email format.";
+        errorMessage = "Requête invalide. Veuillez vérifier le format de votre email.";
       } else if (error.code === 429) {
-        errorMessage = "Too many login attempts. Please try again later.";
+        errorMessage = "Trop de tentatives de connexion. Veuillez réessayer plus tard.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -68,8 +68,8 @@ const Login = ({ onLogin }) => {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1 className="login-title">Welcome Back</h1>
-        <p className="login-subtitle">Sign in to your account</p>
+        <h1 className="login-title">Bon retour</h1>
+        <p className="login-subtitle">Connectez-vous à votre compte</p>
         <form className="login-form" onSubmit={handleSubmit} noValidate>
           <div className="login-field">
             <label htmlFor="email" className="login-label">Email</label>
@@ -77,7 +77,7 @@ const Login = ({ onLogin }) => {
               id="email"
               name="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder="vous@exemple.com"
               value={formValues.email}
               onChange={handleChange}
               className="login-input"
@@ -92,7 +92,7 @@ const Login = ({ onLogin }) => {
               id="password"
               name="password"
               type="password"
-              placeholder="Your password"
+              placeholder="Votre mot de passe"
               value={formValues.password}
               onChange={handleChange}
               className="login-input"
@@ -106,12 +106,12 @@ const Login = ({ onLogin }) => {
             className="login-button"
             disabled={submitting}
           >
-            {submitting ? "Signing in..." : "Sign In"}
+            {submitting ? "Connexion..." : "Se connecter"}
           </button>
           {message && <div className={`login-message ${message.includes('successful') ? 'success' : 'error'}`}>{message}</div>}
         </form>
         <div className="login-footer">
-          <p>Don't have an account? <Link to="/register" className="register-link">Sign up</Link></p>
+          <p>Vous n'avez pas de compte ? <Link to="/register" className="register-link">S'inscrire</Link></p>
         </div>
       </div>
     </div>
