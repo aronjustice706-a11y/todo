@@ -175,7 +175,7 @@ app.post('/api/items/user/:responsable', async (c) => {
     
     console.log('Schema check - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
 
-    let result;
+ let result;
     
     if (hasResponsable) {
       // Ancien schéma avec colonne Responsable
@@ -248,26 +248,69 @@ app.put('/api/items/:id', async (c) => {
   return c.json({ message: "Tâche mise à jour avec succès" }, 200)
 })
 
-// PUT /api/items/user/:responsable/:id - Mettre à jour une tâche d'un utilisateur spécifique (utilise l'ID Appwrite)
+// PUT /api/items/user/:responsable/:id - Mettre à jour une tâche d'un utilisateur spécifique (compatible ancien/nouveau schéma)
 app.put('/api/items/user/:responsable/:id', async (c) => {
-  const responsable = decodeURIComponent(c.req.param('responsable'))
-  const id = c.req.param('id')
-  const body = await c.req.json()
-  const { Titre, Description, Statut, DateLimite, Priorite } = body
+  try {
+    console.log('=== PUT /api/items/user/:responsable/:id START ===')
+    
+    const responsable = decodeURIComponent(c.req.param('responsable'))
+    const id = c.req.param('id')
+    const body = await c.req.json()
+    const { Titre, Description, Statut, DateLimite, Priorite } = body
 
-  console.log('Updating task for responsable (Appwrite ID):', responsable, 'task ID:', id)
+    console.log('Updating task for responsable (Appwrite ID):', responsable, 'task ID:', id)
 
-  const result = await c.env.prod_testbackend
-    .prepare(`UPDATE items SET Titre = ?, Description = ?, Statut = ?, DateLimite = ?, Priorite = ?
-              WHERE ItemId = ? AND Responsable = ?`)
-    .bind(Titre, Description, Statut, DateLimite, Priorite, id, responsable)
-    .run()
+    // Vérifier la structure de la table
+    const schemaQuery = await c.env.prod_testbackend
+      .prepare("PRAGMA table_info(items)")
+      .all()
+    
+    const hasResponsable = schemaQuery.results?.some(col => col.name === 'Responsable')
+    const hasUserId = schemaQuery.results?.some(col => col.name === 'UserId')
+    
+    console.log('Schema check - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
 
-  if (result.changes === 0) {
-    return c.json({ error: "Tâche non trouvée ou vous n'êtes pas le responsable" }, 404)
+    let result;
+    
+    if (hasResponsable) {
+      // Ancien schéma avec colonne Responsable
+      console.log('Updating task with old schema (Responsable column)')
+      result = await c.env.prod_testbackend
+        .prepare(`UPDATE items SET Titre = ?, Description = ?, Statut = ?, DateLimite = ?, Priorite = ?
+                  WHERE ItemId = ? AND Responsable = ?`)
+        .bind(Titre, Description, Statut, DateLimite, Priorite, id, responsable)
+        .run()
+    } else if (hasUserId) {
+      // Nouveau schéma avec colonne UserId
+      console.log('Updating task with new schema (UserId column)')
+      result = await c.env.prod_testbackend
+        .prepare(`UPDATE items SET Titre = ?, Description = ?, Statut = ?, DateLimite = ?, Priorite = ?
+                  WHERE ItemId = ? AND UserId = ?`)
+        .bind(Titre, Description, Statut, DateLimite, Priorite, id, responsable)
+        .run()
+    } else {
+      console.error('No recognized schema found')
+      return c.json({ 
+        error: "Structure de base de données non reconnue",
+        details: "Colonnes disponibles: " + schemaQuery.results?.map(col => col.name).join(', ')
+      }, 500)
+    }
+
+    if (result.changes === 0) {
+      return c.json({ error: "Tâche non trouvée ou vous n'êtes pas le responsable" }, 404)
+    }
+
+    return c.json({ message: "Tâche mise à jour avec succès" })
+  } catch (error) {
+    console.error('Error in PUT /api/items/user/:responsable/:id:', error)
+    return c.json({ 
+      error: "Erreur lors de la mise à jour de la tâche",
+      details: error.message,
+      stack: error.stack
+    }, 500)
+  } finally {
+    console.log('=== PUT /api/items/user/:responsable/:id END ===')
   }
-
-  return c.json({ message: "Tâche mise à jour avec succès" })
 })
 
 // DELETE /api/items/:id - Supprimer une tâche (ancien endpoint)
@@ -286,23 +329,65 @@ app.delete('/api/items/:id', async (c) => {
   return c.json({ message: "Tâche supprimée avec succès" })
 })
 
-// DELETE /api/items/user/:responsable/:id - Supprimer une tâche d'un utilisateur spécifique (utilise l'ID Appwrite)
+// DELETE /api/items/user/:responsable/:id - Supprimer une tâche d'un utilisateur spécifique (compatible ancien/nouveau schéma)
 app.delete('/api/items/user/:responsable/:id', async (c) => {
-  const responsable = decodeURIComponent(c.req.param('responsable'))
-  const id = c.req.param('id')
+  try {
+    console.log('=== DELETE /api/items/user/:responsable/:id START ===')
+    
+    const responsable = decodeURIComponent(c.req.param('responsable'))
+    const id = c.req.param('id')
 
-  console.log('Deleting task for responsable (Appwrite ID):', responsable, 'task ID:', id)
+    console.log('Deleting task for responsable (Appwrite ID):', responsable, 'task ID:', id)
 
-  const result = await c.env.prod_testbackend
-    .prepare("DELETE FROM items WHERE ItemId = ? AND Responsable = ?")
-    .bind(id, responsable)
-    .run()
+    // Vérifier la structure de la table
+    const schemaQuery = await c.env.prod_testbackend
+      .prepare("PRAGMA table_info(items)")
+      .all()
+    
+    const hasResponsable = schemaQuery.results?.some(col => col.name === 'Responsable')
+    const hasUserId = schemaQuery.results?.some(col => col.name === 'UserId')
+    
+    console.log('Schema check - hasResponsable:', hasResponsable, 'hasUserId:', hasUserId)
 
-  if (result.changes === 0) {
-    return c.json({ error: "Tâche non trouvée ou vous n'êtes pas le responsable" }, 404)
+    let result;
+    
+    if (hasResponsable) {
+      // Ancien schéma avec colonne Responsable
+      console.log('Deleting task with old schema (Responsable column)')
+      result = await c.env.prod_testbackend
+        .prepare("DELETE FROM items WHERE ItemId = ? AND Responsable = ?")
+        .bind(id, responsable)
+        .run()
+    } else if (hasUserId) {
+      // Nouveau schéma avec colonne UserId
+      console.log('Deleting task with new schema (UserId column)')
+      result = await c.env.prod_testbackend
+        .prepare("DELETE FROM items WHERE ItemId = ? AND UserId = ?")
+        .bind(id, responsable)
+        .run()
+    } else {
+      console.error('No recognized schema found')
+      return c.json({ 
+        error: "Structure de base de données non reconnue",
+        details: "Colonnes disponibles: " + schemaQuery.results?.map(col => col.name).join(', ')
+      }, 500)
+    }
+
+    if (result.changes === 0) {
+      return c.json({ error: "Tâche non trouvée ou vous n'êtes pas le responsable" }, 404)
+    }
+
+    return c.json({ message: "Tâche supprimée avec succès" })
+  } catch (error) {
+    console.error('Error in DELETE /api/items/user/:responsable/:id:', error)
+    return c.json({ 
+      error: "Erreur lors de la suppression de la tâche",
+      details: error.message,
+      stack: error.stack
+    }, 500)
+  } finally {
+    console.log('=== DELETE /api/items/user/:responsable/:id END ===')
   }
-
-  return c.json({ message: "Tâche supprimée avec succès" })
 })
 
 // GET /api/debug/schema - Diagnostic complet de la structure de la base
@@ -372,4 +457,4 @@ app.get('/', (c) => {
   })
 })
 
-export default app
+export default app;
