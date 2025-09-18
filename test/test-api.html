@@ -1,0 +1,75 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Production</title>
+</head>
+<body>
+    <h1>Test API Production</h1>
+    <button onclick="testGet()">Test GET /api/items</button>
+    <button onclick="testPost()">Test POST /api/items</button>
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'https://testbackend.aronjustice706.workers.dev';
+        
+        async function testGet() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test GET en cours...';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/items`);
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <h3>✅ GET réussi !</h3>
+                        <p>Nombre de tâches: ${data.length}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<h3>❌ Erreur GET: ${response.status}</h3>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<h3>❌ Erreur GET: ${error.message}</h3>`;
+            }
+        }
+        
+        async function testPost() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Test POST en cours...';
+            
+            try {
+                const newTask = {
+                    Titre: 'Test depuis le navigateur',
+                    Description: 'Tâche de test',
+                    Statut: 'pending',
+                    DateLimite: null,
+                    Priorite: 'moyenne',
+                    // Utilise UserId comme identifiant principal
+                    UserId: 'test_user_123',
+                    UserEmail: 'test@example.com'
+                };
+                
+                const response = await fetch(`${API_URL}/api/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newTask)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <h3>✅ POST réussi !</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<h3>❌ Erreur POST: ${response.status}</h3>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<h3>❌ Erreur POST: ${error.message}</h3>`;
+            }
+        }
+    </script>
+</body>
+</html> -->

@@ -1,0 +1,138 @@
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f7f7f8;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+  padding: 24px;
+}
+
+.register-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.register-subtitle {
+  margin-top: 6px;
+  color: #555;
+  font-size: 14px;
+}
+
+.register-form {
+  margin-top: 18px;
+}
+
+.register-field {
+  margin-bottom: 14px;
+}
+
+.register-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.register-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #d7d7db;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.register-input:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+.register-error {
+  color: #b00020;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.register-button {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #1a73e8;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.register-button:hover:not(:disabled) {
+  background: #1557b0;
+}
+
+.register-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.register-message {
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.register-message.success {
+  color: #137333;
+}
+
+.register-message.error {
+  color: #b00020;
+}
+
+.register-footer {
+  margin-top: 20px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.register-footer p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.login-link {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .register-page {
+    padding: 16px;
+  }
+  
+  .register-card {
+    padding: 20px;
+  }
+  
+  .register-title {
+    font-size: 20px;
+  }
+}
